@@ -1,6 +1,6 @@
 TOOLCHAIN := $(DEVKITARM)
 COMPARE ?= 0
-RELEASE ?= 0
+RELEASE ?= 1
 EXPANSION := 1
 
 ifeq (compare,$(MAKECMDGOALS))
@@ -45,7 +45,7 @@ PORYSCRIPT := tools/poryscript/poryscript-linux/poryscript$(EXE)
 endif
 
 ROGUEPORYSCRIPTSDIR := data/scripts/Rogue
-PORYSCRIPTARGS := -fc $(ROGUEPORYSCRIPTSDIR)/Strings/poryscript_font_config.json
+PORYSCRIPTARGS := -fc $(ROGUEPORYSCRIPTSDIR)/Strings/poryscript_font_config.json 
 
 ifeq ($(EXPANSION), 1)
 PORYSCRIPTARGS += -s ROGUE_VERSION=ROGUE_VERSION_EXPANSION
@@ -174,7 +174,7 @@ override CFLAGS += -Og
 else
 override CFLAGS += -O2
 endif
-override CFLAGS += -gdwarf-4 -gstrict-dwarf -mthumb -mthumb-interwork -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast -std=gnu17 -Werror -Wall -Wno-strict-aliasing -Wno-attribute-alias -Woverride-init
+override CFLAGS += -mthumb -mthumb-interwork -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast -std=gnu17 -Werror -Wall -Wno-strict-aliasing -Wno-attribute-alias -Woverride-init
 ifeq ($(ANALYZE),1)
 override CFLAGS += -fanalyzer
 endif
@@ -198,7 +198,7 @@ ifeq ($(TEST),1)
 OBJ_DIR := $(TEST_OBJ_DIR_NAME)
 endif
 
-CPPFLAGS := -iquote include -iquote $(GFLIB_SUBDIR) -Wno-trigraphs -DMODERN=$(MODERN) -DTESTING=$(TEST) -std=gnu17
+CPPFLAGS := -iquote include -iquote $(GFLIB_SUBDIR) -Wno-trigraphs -DMODERN=$(MODERN) -DTESTING=$(TEST)
 ifneq ($(MODERN),1)
 CPPFLAGS += -I tools/agbcc/include -I tools/agbcc -nostdinc -undef
 endif
@@ -230,12 +230,11 @@ ROMTEST ?= $(shell { command -v mgba-rom-test || command -v tools/mgba/mgba-rom-
 ROMTESTHYDRA := tools/mgba-rom-test-hydra/mgba-rom-test-hydra$(EXE)
 MEMORYSTATS := tools/Pokabbie/Build/MemoryStats/memorystats$(EXE)
 CUSTOMJSON := tools/Pokabbie/Build/CustomJson/customjson$(EXE)
-QUERYBAKER := tools/Pokabbie/Build/QueryBaker/querybaker$(EXE)
 
 PERL := perl
 
 # Inclusive list. If you don't want a tool to be built, don't add it here.
-TOOLDIRS := tools/aif2pcm tools/bin2c tools/gbafix tools/gbagfx tools/jsonproc tools/mapjson tools/mid2agb tools/preproc tools/ramscrgen tools/rsfont tools/scaninc tools/Pokabbie/Build/MemoryStats tools/Pokabbie/Build/CustomJson
+TOOLDIRS := tools/aif2pcm tools/bin2c tools/gbafix tools/gbagfx tools/jsonproc tools/mapjson tools/mid2agb tools/preproc tools/ramscrgen tools/rsfont tools/scaninc
 CHECKTOOLDIRS = tools/patchelf tools/mgba-rom-test-hydra
 TOOLBASE = $(TOOLDIRS:tools/%=%)
 TOOLS = $(foreach tool,$(TOOLBASE),tools/$(tool)/$(tool)$(EXE))
@@ -262,14 +261,6 @@ infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst 
 # Since we don't need to reload most of this makefile
 ifeq (,$(filter-out all rom compare agbcc modern check libagbsyscall syms $(TESTELF),$(MAKECMDGOALS)))
 $(call infoshell, $(MAKE) -f make_tools.mk)
-
-# If running locally and ROM has already been build, run
-ifeq ($(wildcard $(ROM)*), $(ROM))
-ifeq ("$(GITHUB_REPOSITORY_OWNER)","")
-$(call infoshell, $(MAKE) -f make_tools_local.mk)
-endif
-endif
-
 else
 NODEP ?= 1
 endif
